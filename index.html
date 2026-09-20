@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b3d91">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="AP Protensão">
-<title>AP Protensão — Laje Protendida</title>
+<title>APavan Protensão — Laje Protendida</title>
 <link rel="manifest" id="manifest-link">
 <link rel="apple-touch-icon" id="apple-icon" sizes="180x180">
 <link rel="icon" id="favicon-link" type="image/svg+xml">
@@ -92,7 +92,7 @@ footer.app strong{color:var(--azul)}
 
 <header class="top">
   <div class="logo">AP</div>
-  <div><h1>AP Protensão — Laje Protendida</h1><p>Cálculo e análise de lajes protendidas — NBR 6118:2023</p></div>
+  <div><h1>APavan Engenharia e Consultoria — Laje Protendida</h1><p>Cálculo e análise de lajes protendidas — NBR 6118:2023</p></div>
   <div class="spacer"></div>
   <button class="btnRecalc" id="btnRecalcTop">🔄 Recalcular</button>
   <span class="pill" id="installPill" style="display:none">Instalar</span>
@@ -193,12 +193,9 @@ footer.app strong{color:var(--azul)}
           </div>
         </div>
         <div class="note" id="matNote">—</div>
-
         <h3 style="color:#0b3d91;font-size:13px;margin:18px 0 6px">Resistência do concreto na idade t — NBR 6118:2023 item 12.3.3</h3>
         <div class="results-grid" id="fckjBox"></div>
-        <div class="chart-wrap">
-          <canvas class="chart" id="cvFckjt" style="height:220px"></canvas>
-        </div>
+        <div class="chart-wrap"><canvas class="chart" id="cvFckjt" style="height:220px"></canvas></div>
       </div>
       <div class="card">
         <h2>Aço Passivo</h2>
@@ -295,6 +292,12 @@ footer.app strong{color:var(--azul)}
           <div class="field"><label>e central <span class="unit">(cm)</span></label><input type="number" step="0.5" id="cabE" value="8"></div>
           <div class="field"><label>e ancoragem <span class="unit">(cm)</span></label><input type="number" step="0.5" id="cabE0" value="0"></div>
           <div class="field"><label>c inf <span class="unit">(cm)</span></label><input type="number" step="0.5" id="cabCinf" value="3.5"></div>
+          <div class="field">
+            <label>Trecho reto (apoio) nas extremidades <span class="unit">(20 a 50 cm)</span></label>
+            <input type="number" step="5" id="cabReto" value="30" min="20" max="50">
+            <input type="range" id="cabRetoSlider" value="30" min="20" max="50" step="5" style="margin-top:6px;accent-color:#0b3d91">
+            <span style="font-size:10.5px;color:#94a3b8;text-align:center" id="cabRetoLabel">30 cm</span>
+          </div>
         </div>
         <div class="chart-wrap"><canvas class="chart" id="cvCabo" style="height:400px"></canvas></div>
         <div class="note" id="cabNote">—</div>
@@ -323,15 +326,13 @@ footer.app strong{color:var(--azul)}
           <div class="field"><label>h<sub>b</sub> — dimensão na dir. h <span class="unit">(cm)</span></label><input type="number" step="0.1" id="anc_hb" value="12.7"></div>
           <div class="field"><label>Diâmetro do cabo <span class="unit">(mm)</span></label><input type="number" step="0.1" id="anc_phi" value="12.7"></div>
         </div>
-        <div class="actions">
-          <button class="btn ghost" id="btnSyncAnc">🔄 Sincronizar com Protensão</button>
-        </div>
+        <div class="actions"><button class="btn ghost" id="btnSyncAnc">🔄 Sincronizar com Protensão</button></div>
         <div class="results-grid" id="ancPlacaBox" style="margin-top:14px"></div>
         <div class="note" id="ancPlacaNote">—</div>
       </div>
       <div class="card">
         <h2>Fretagem — Armadura Transversal de Solidarização</h2>
-        <div class="sub">Princípio de St. Venant — zona de regularização de tensões junto à ancoragem.</div>
+        <div class="sub">Princípio de St. Venant — zona de regularização de tensões junto à ancoragem (trecho reto do cabo).</div>
         <div class="results-grid" id="ancFretBox"></div>
         <h3 style="color:#0b3d91;font-size:13px;margin:20px 0 8px">Esquema da zona de fretagem</h3>
         <canvas id="cvFretagem" style="width:100%;display:block;height:280px"></canvas>
@@ -340,7 +341,7 @@ footer.app strong{color:var(--azul)}
       <div class="card">
         <h2>Resumo do Detalhamento</h2>
         <div class="results-grid" id="ancResumoBox"></div>
-        <div class="note"><b>Observações:</b> • <b>Placa de ancoragem</b> — NBR 6118:2023 item 9.6.1.2 • <b>Fretagem</b> — princípio de St. Venant • Armadura de solidarização distribuída ao longo de ≈ h a partir da face</div>
+        <div class="note"><b>Observações:</b> • <b>Placa de ancoragem</b> — NBR 6118:2023 item 9.6.1.2 • <b>Fretagem</b> — princípio de St. Venant • Armadura de solidarização distribuída na zona de apoio (trecho reto do cabo)</div>
       </div>
     </section>
 
@@ -500,7 +501,6 @@ const Engine = (() => {
     return 0.0015;
   }
   function concreto({fck,alphaE=1.0}){const fcd=fck/1.4;const fctm=fck<=50?0.3*Math.pow(fck,2/3):2.12*Math.log(1+0.11*fck);const Eci=alphaE*5600*Math.sqrt(fck);const alphaI=Math.min(0.8+0.2*fck/80,1.0);return {fck,fcd,fctm,fctkInf:0.7*fctm,Eci,Ecs:alphaI*Eci};}
-  /* ============ fckj(t) — NBR 6118:2023 item 12.3.3 ============ */
   function fckj({fck,gammaC=1.4,s=0.25,t=20}){
     const beta1=Math.exp(s*(1-Math.sqrt(28/t)));
     const fckj=beta1*0.85*fck/gammaC;
@@ -634,12 +634,10 @@ const Engine = (() => {
     for (let i=n-1;i>=0;i--){let s=M[i][n];for (let j=i+1;j<n;j++) s-=M[i][j]*x[j];x[i]=s/M[i][i];}
     return x;
   }
-  /* ============ PLACA DE ANCORAGEM — divisão por A'b ============ */
   function placaAncoragem({ap_mm,bp_mm,esp_mm,P0_kN,Pinf_kN,fckj_MPa,fck_MPa}){
     const Ab_cm2=(ap_mm/10)*(bp_mm/10);
     const Abp_cm2=esp_mm>0?((ap_mm+esp_mm)/10)*((bp_mm+esp_mm)/10):Ab_cm2;
     const razao=Abp_cm2/Ab_cm2;
-    // Divisão pela placa AMPLIADA (A'b) conforme NBR 6118:2023 item 9.6.1.2
     const fcp_ato_MPa=(P0_kN/Abp_cm2)*10;
     const fcp_serv_MPa=(Pinf_kN/Abp_cm2)*10;
     const limServ1=0.6*fck_MPa*Math.sqrt(razao);
@@ -649,7 +647,6 @@ const Engine = (() => {
     const limAto1=0.8*fckj_MPa*Math.sqrt(radicando);
     const limAto2=1.25*fckj_MPa;
     const limAto=Math.min(limAto1,limAto2);
-    // fck mínimos para placas coladas (A'b = Ab → razao = 1)
     const fck_min_serv=(Pinf_kN/Abp_cm2*10)/0.6;
     const fckj_min_ato=(P0_kN/Abp_cm2*10)/(0.8*Math.sqrt(0.8));
     const okServ=fcp_serv_MPa<=limServ;
@@ -684,6 +681,12 @@ const errLog=[];
 function logErr(m){errLog.push(`[${new Date().toLocaleTimeString()}] ${m}`);const p=$('errPanel');if(p){p.style.display='block';p.textContent=errLog.slice(-8).join('\n');}}
 function clearErr(){errLog.length=0;const p=$('errPanel');if(p) p.style.display='none';}
 
+function clampCabReto(v){
+  v = parseFloat(v);
+  if (!isFinite(v)) v = 30;
+  return Math.min(50, Math.max(20, v));
+}
+
 function readInputs(){
   const cord=$('pCord').value.split('|');
   const Ap1=parseFloat(cord[1])||0.987;
@@ -691,7 +694,7 @@ function readInputs(){
   const nCabos=Math.max(1,parseInt($('pNCabos').value)||1);
   const eCab=gv('cabE'),eProt=gv('pE');
   const e_cm=isFinite(eCab)?eCab:(isFinite(eProt)?eProt:0);
-  return {fck:gv('mFck'),alphaE:gv('mAlphaE'),gammaC:gv('mGammaC'),Lx:gv('gLx'),Ly:gv('gLy'),h:gv('gH'),b:gv('gB'),c:gv('gC'),sis:$('gSis').value,categoria:$('mCategoria').value,phiLong:parseFloat($('mPhiLong').value)||10,phiCord:parseFloat(cord[0])||12.7,Ap1,fptk:parseFloat(cord[2])||1900,fp01k:parseFloat(cord[3])||1670,Ep:parseFloat(cord[4])||195,nCord,nCabos,Ap_cabo:Ap1*nCord,Ap_total:Ap1*nCord*nCabos,e_cm,sigmaP0:gv('pSigma0'),mu:gv('pMu'),k:gv('pK'),slip:gv('pSlip'),ecs:gv('pEcs'),phi:gv('pPhi'),relaxPct:gv('pRelax'),gammaCarga:gv('cGammaC'),rev:gv('cRev'),contE:gv('cContE'),contG:gv('cContG'),outros:gv('cOutros'),parH:gv('cParH'),parE:gv('cParE'),parG:gv('cParG'),parL:gv('cParL'),q:gv('cQ'),gammaG:gv('cGG'),gammaQ:gv('cGQ'),psi1:gv('cPsi1'),psi2:gv('cPsi2'),classe:$('mAgress').value,elemTipo:$('mElemTipo').value,aderente:$('pAder').value==='aderente',a_apoio:gv('pApoioA'),l_medio:gv('pLmedio'),cabForma:$('cabForma').value,cabE0:gv('cabE0'),cabCinf:gv('cabCinf'),tipoCimento:parseFloat($('mTipoCimento').value),idadeT:parseFloat($('mIdadeT').value)};
+  return {fck:gv('mFck'),alphaE:gv('mAlphaE'),gammaC:gv('mGammaC'),Lx:gv('gLx'),Ly:gv('gLy'),h:gv('gH'),b:gv('gB'),c:gv('gC'),sis:$('gSis').value,categoria:$('mCategoria').value,phiLong:parseFloat($('mPhiLong').value)||10,phiCord:parseFloat(cord[0])||12.7,Ap1,fptk:parseFloat(cord[2])||1900,fp01k:parseFloat(cord[3])||1670,Ep:parseFloat(cord[4])||195,nCord,nCabos,Ap_cabo:Ap1*nCord,Ap_total:Ap1*nCord*nCabos,e_cm,sigmaP0:gv('pSigma0'),mu:gv('pMu'),k:gv('pK'),slip:gv('pSlip'),ecs:gv('pEcs'),phi:gv('pPhi'),relaxPct:gv('pRelax'),gammaCarga:gv('cGammaC'),rev:gv('cRev'),contE:gv('cContE'),contG:gv('cContG'),outros:gv('cOutros'),parH:gv('cParH'),parE:gv('cParE'),parG:gv('cParG'),parL:gv('cParL'),q:gv('cQ'),gammaG:gv('cGG'),gammaQ:gv('cGQ'),psi1:gv('cPsi1'),psi2:gv('cPsi2'),classe:$('mAgress').value,elemTipo:$('mElemTipo').value,aderente:$('pAder').value==='aderente',a_apoio:gv('pApoioA'),l_medio:gv('pLmedio'),cabForma:$('cabForma').value,cabE0:gv('cabE0'),cabCinf:gv('cabCinf'),cabReto:clampCabReto(gv('cabReto')),tipoCimento:parseFloat($('mTipoCimento').value),idadeT:parseFloat($('mIdadeT').value)};
 }
 
 function calcularTudo(){
@@ -783,29 +786,21 @@ function plotCanvas(canvas,xArr,series,opts){
 }
 
 function renderGeometria(R){try{$('geoNote').innerHTML=`A=${num(R.geom.A,0)} cm² · I=${num(R.geom.I,0)} cm⁴ · W=${num(R.geom.W,0)} cm³ · d=${num(R.geom.d,2)} cm · ${R.esf.coef.desc}`;}catch(e){logErr('renderGeometria: '+e.message);}}
-function renderMateriais(R){try{const c=R.conc;const ok=R.inp.fck>=R.fckMin.fck_min;$('matNote').innerHTML=`fck=C${num(R.inp.fck,0)} · fcd=${num(c.fcd,2)} · fctm=${num(c.fctm,3)} · Eci=${num(c.Eci,0)} · Ecs=${num(c.Ecs,0)} MPa<br><b>Tab.7.1:</b> fck,min=C${R.fckMin.fck_min} · a/c≤${R.fckMin.ac_max} ${ok?'✓':'⚠'} · x/d≤${R.limXD}<br><b>σ<sub>cd</sub> = 0,85·fcd = 0,85·${num(R.inp.fck/1.4,2)} = ${num(0.85*R.inp.fck/1.4,2)} MPa</b>`;}catch(e){logErr('renderMateriais: '+e.message);}}
+function renderMateriais(R){try{const c=R.conc;const ok=R.inp.fck>=R.fckMin.fck_min;$('matNote').innerHTML=`fck=C${num(R.inp.fck,0)} · fcd=${num(c.fcd,2)} · fctm=${num(c.fctm,3)} · Eci=${num(c.Eci,0)} · Ecs=${num(c.Ecs,0)} MPa<br><b>Tab.7.1:</b> fck,min=C${R.fckMin.fck_min} · a/c≤${R.fckMin.ac_max} ${ok?'✓':'⚠'} · x/d≤${R.limXD}<br><b>σ<sub>cd</sub> = 0,85·fcd = ${num(0.85*R.inp.fck/1.4,2)} MPa</b>`;}catch(e){logErr('renderMateriais: '+e.message);}}
 
-/* ============ NOVO — renderFckj ============ */
 function renderFckj(R){
   try {
     const f = R.fckjInfo;
     $('fckjBox').innerHTML = [
       kpi('f<sub>ck</sub> (28 dias)', num(f.fck,1), 'MPa', 'OK', `t = 28 dias`),
-      kpi('s — tipo de cimento', num(f.s,2), '—', 'OK',
-          f.s === 0.25 ? 'CPI / CP II' : f.s === 0.38 ? 'CP III / CP IV' : 'CP V-ARI'),
+      kpi('s — tipo de cimento', num(f.s,2), '—', 'OK', f.s === 0.25 ? 'CPI / CP II' : f.s === 0.38 ? 'CP III / CP IV' : 'CP V-ARI'),
       kpi('t — idade efetiva', num(f.t,0), 'dias', 'OK', ''),
-      kpi('β₁ = exp[s·(1−√(28/t))]', num(f.beta1,4), '—', 'OK',
-          `exp(${num(f.s,2)}·(1−√(28/${num(f.t,0)})))`),
-      kpi('f<sub>ckj</sub> característica', num(f.fckj_carac,2), 'MPa', 'OK',
-          `β₁ · f<sub>ck</sub> = ${num(f.beta1,3)} · ${num(f.fck,0)}`),
-      kpi('f<sub>ckj</sub> / γ<sub>c</sub>', num(f.fckj_design,2), 'MPa', 'OK',
-          `${num(f.fckj_carac,2)} / 1,4`),
-      kpi('<b>f<sub>ckj</sub> × 0,85</b>', '<b>' + num(f.fckj,2) + '</b>', 'MPa', 'OK',
-          `β₁ · 0,85 · f<sub>ck</sub> / γ<sub>c</sub>`),
-      kpi('σ<sub>cd</sub> = 0,85·f<sub>cd</sub>', num(f.sigma_cd,2), 'MPa', 'OK',
-          `para cálculo ELU`)
+      kpi('β₁ = exp[s·(1−√(28/t))]', num(f.beta1,4), '—', 'OK', `exp(${num(f.s,2)}·(1−√(28/${num(f.t,0)})))`),
+      kpi('f<sub>ckj</sub> característica', num(f.fckj_carac,2), 'MPa', 'OK', `β₁ · f<sub>ck</sub>`),
+      kpi('f<sub>ckj</sub> / γ<sub>c</sub>', num(f.fckj_design,2), 'MPa', 'OK', `${num(f.fckj_carac,2)} / 1,4`),
+      kpi('<b>f<sub>ckj</sub> × 0,85</b>', '<b>' + num(f.fckj,2) + '</b>', 'MPa', 'OK', `β₁ · 0,85 · f<sub>ck</sub> / γ<sub>c</sub>`),
+      kpi('σ<sub>cd</sub> = 0,85·f<sub>cd</sub>', num(f.sigma_cd,2), 'MPa', 'OK', `para cálculo ELU`)
     ].join('');
-
     const cv = $('cvFckjt');
     if (cv){
       const dpr = window.devicePixelRatio || 1;
@@ -817,35 +812,25 @@ function renderFckj(R){
       ctx.clearRect(0,0,W,H);
       const pad = {l:60, r:20, t:30, b:40};
       const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
-
       const pts = f.evolucao;
       const maxY = Math.max(...pts.map(p => p.fckj)) * 1.1;
-
       ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=1;
       ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t+ch); ctx.lineTo(pad.l+cw, pad.t+ch); ctx.stroke();
-
       ctx.fillStyle='#94a3b8'; ctx.font='11px sans-serif';
       ctx.textAlign='right'; ctx.textBaseline='middle';
       for (let i = 0; i <= 5; i++){
         const y = pad.t + (i/5)*ch;
-        const val = maxY * (1 - i/5);
-        ctx.fillText(val.toFixed(1), pad.l-6, y);
+        ctx.fillText((maxY * (1 - i/5)).toFixed(1), pad.l-6, y);
         ctx.strokeStyle='#eef2f7';
         ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
       }
-
       const X = t => pad.l + (t/90)*cw;
       const Y = v => pad.t + (1 - v/maxY)*ch;
       ctx.strokeStyle='#0b3d91'; ctx.lineWidth=2.5;
       ctx.beginPath();
-      pts.forEach((p,i) => {
-        const px = X(p.t), py = Y(p.fckj);
-        if (i === 0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
-      });
+      pts.forEach((p,i) => { const px = X(p.t), py = Y(p.fckj); if (i === 0) ctx.moveTo(px,py); else ctx.lineTo(px,py); });
       ctx.stroke();
-
-      const tAtual = f.t;
-      const vAtual = f.fckj;
+      const tAtual = f.t, vAtual = f.fckj;
       if (tAtual <= 90){
         const px = X(tAtual), py = Y(vAtual);
         ctx.fillStyle = '#dc2626';
@@ -856,16 +841,11 @@ function renderFckj(R){
         ctx.textAlign = 'left';
         ctx.fillText(`t=${tAtual}d · ${vAtual.toFixed(2)} MPa`, px+8, py-6);
       }
-
       ctx.fillStyle='#94a3b8'; ctx.font='11px sans-serif';
       ctx.textAlign='center'; ctx.textBaseline='top';
-      for (let i = 0; i <= 6; i++){
-        const x = pad.l + (i/6)*cw;
-        ctx.fillText((i*15).toString(), x, pad.t+ch+8);
-      }
+      for (let i = 0; i <= 6; i++){ ctx.fillText((i*15).toString(), pad.l + (i/6)*cw, pad.t+ch+8); }
       ctx.fillStyle='#64748b'; ctx.textAlign='center';
       ctx.fillText('Tempo (dias)', pad.l+cw/2, pad.t+ch+24);
-
       ctx.fillStyle='#0b3d91'; ctx.font = 'bold 12px sans-serif';
       ctx.textAlign = 'left'; ctx.textBaseline = 'top';
       ctx.fillText('Evolução de fckj(t) [MPa]', pad.l, 8);
@@ -913,6 +893,7 @@ function renderCargas(R){
   } catch(e){ logErr('renderCargas: '+e.message); }
 }
 
+/* ============ renderCaboSection — apenas armadura positiva inferior ============ */
 function renderCaboSection(R){
   try {
     const cv=$('cvCabo');if (!cv) return;
@@ -927,40 +908,250 @@ function renderCaboSection(R){
     const e=isFinite(gv('cabE'))?gv('cabE'):R.inp.e_cm;
     const e0=gv('cabE0')||0;
     const cInf=gv('cabCinf')||3.5;
+    let s1_m = clampCabReto(parseFloat($('cabReto').value)) / 100;
+    const s1 = Math.min(s1_m, L/2 - 0.01);
     const forma=$('cabForma').value;
-    const pad={l:80,r:60,t:70,b:120};
+    const pad={l:80,r:60,t:80,b:120};
     const cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
     const X=x=>pad.l+(x/L)*cw;
     const Y=y=>pad.t+(1-y/h)*ch;
+
     const grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ch);
     grd.addColorStop(0,'#e8eef7');grd.addColorStop(1,'#dde6f2');
     ctx.fillStyle=grd;ctx.fillRect(pad.l,pad.t,cw,ch);
     ctx.strokeStyle='#0b3d91';ctx.lineWidth=2.5;ctx.strokeRect(pad.l,pad.t,cw,ch);
+
     ctx.save();ctx.beginPath();ctx.rect(pad.l,pad.t,cw,ch);ctx.clip();
     ctx.strokeStyle='rgba(11,61,145,.08)';ctx.lineWidth=1;
     for (let i=-ch;i<cw;i+=12){ctx.beginPath();ctx.moveTo(pad.l+i,pad.t);ctx.lineTo(pad.l+i+ch,pad.t+ch);ctx.stroke();}
     ctx.restore();
+
+    if (forma==='parabolico' && s1 > 0.001){
+      const hb_ref = 12.7;
+      const T_fret = 0.25 * R.perdas.Pef * (1 - hb_ref / R.inp.h);
+      const As_fret = (T_fret * 1000) / (0.5 * R.acoP.fyd) / 100;
+      const n_estribos_calc = Math.max(3, Math.ceil(As_fret / 0.785));
+
+      [0, L - s1].forEach((xIni) => {
+        const xFim = xIni + s1;
+        const pxIni = X(xIni), pxFim = X(xFim);
+
+        ctx.fillStyle = 'rgba(11,61,145,.10)';
+        ctx.fillRect(pxIni, pad.t, pxFim - pxIni, ch);
+
+        ctx.strokeStyle = '#0b3d91'; ctx.lineWidth = 1.5; ctx.setLineDash([5,3]);
+        ctx.beginPath();
+        ctx.moveTo(pxFim, pad.t); ctx.lineTo(pxFim, pad.t + ch);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const n_visiveis = Math.min(n_estribos_calc, 8);
+        ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 1.8;
+        for (let k = 1; k <= n_visiveis; k++){
+          const xEs = pxIni + (k / (n_visiveis + 1)) * (pxFim - pxIni);
+          ctx.beginPath();
+          ctx.moveTo(xEs, pad.t + 6);
+          ctx.lineTo(xEs, pad.t + ch - 6);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = '#0b3d91';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('APOIO', (pxIni + pxFim) / 2, pad.t - 12);
+
+        ctx.fillStyle = '#16a34a';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.fillText(`Fretagem: ${n_estribos_calc} φ10`, (pxIni + pxFim) / 2, pad.t + ch + 18);
+      });
+    }
+
+    // Linha CG (referência)
     ctx.strokeStyle='#94a3b8';ctx.setLineDash([6,5]);ctx.lineWidth=1.2;
     ctx.beginPath();ctx.moveTo(pad.l,Y(h/2));ctx.lineTo(pad.l+cw,Y(h/2));ctx.stroke();
     ctx.setLineDash([]);
+    ctx.fillStyle='#64748b'; ctx.font='bold 11px sans-serif';
+    ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText('CG', pad.l-8, Y(h/2));
+
+    // Cobrimento inferior (tracejado cinza) — NBR 6118
+    ctx.strokeStyle='#cbd5e1';ctx.setLineDash([3,3]);ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l,Y(cInf));ctx.lineTo(pad.l+cw,Y(cInf));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ===== ARMADURA POSITIVA INFERIOR (única armadura passiva na seção) =====
     const nBars=Math.max(12,Math.floor(cw/45));
-    ctx.fillStyle='#16a34a';
-    for (let i=0;i<nBars;i++){const x=pad.l+(i+0.5)/nBars*cw;ctx.beginPath();ctx.arc(x,Y(h-c-0.7),3.5,0,2*Math.PI);ctx.fill();}
+    // faixa de fundo sutil destacando a linha da armadura
+    ctx.fillStyle='rgba(220,38,38,.08)';
+    ctx.fillRect(pad.l, Y(cInf+0.7)-5, cw, 10);
+    // marcações da armadura positiva
     ctx.fillStyle='#dc2626';
-    for (let i=0;i<nBars;i++){const x=pad.l+(i+0.5)/nBars*cw;ctx.beginPath();ctx.arc(x,Y(cInf+0.7),3.5,0,2*Math.PI);ctx.fill();}
-    const N=120,pts=[];
-    for (let i=0;i<=N;i++){const t=i/N,x=t*L;let y;if (forma==='reto') y=h/2-e;else if (forma==='parabolico'){const a=(e-e0)/Math.pow(L/2,2);const dx=x-L/2;y=(h/2-e)+a*dx*dx;}else y=h/2-e0-(e-e0)*(1-Math.abs(2*t-1));pts.push({x,y});}
+    for (let i=0;i<nBars;i++){
+      const x=pad.l+(i+0.5)/nBars*cw;
+      ctx.beginPath();
+      ctx.arc(x, Y(cInf+0.7), 3.8, 0, 2*Math.PI);
+      ctx.fill();
+    }
+
+    // CABO — pontos
+    const N=200,pts=[];
+    for (let i=0;i<=N;i++){
+      const t=i/N, x=t*L;
+      let y;
+      if (forma==='reto'){
+        y=h/2-e;
+      } else if (forma==='parabolico'){
+        if (x <= s1){ y = h/2 - e0; }
+        else if (x >= L - s1){ y = h/2 - e0; }
+        else {
+          const a = (e - e0) / Math.pow(L/2 - s1, 2);
+          const dx = x - L/2;
+          y = (h/2 - e) + a * dx * dx;
+        }
+      } else {
+        y = h/2 - e0 - (e - e0) * (1 - Math.abs(2*t - 1));
+      }
+      pts.push({x,y});
+    }
     ctx.strokeStyle='#f59e0b';ctx.lineWidth=3;
     ctx.beginPath();
     for (let i=0;i<pts.length;i++){const px=X(pts[i].x),py=Y(pts[i].y);if (i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);}
     ctx.stroke();
-    const wP=R.perdas.Pef*8*(e/100)/(L*L);
+
+    if (forma==='parabolico' && s1 > 0.001){
+      ctx.strokeStyle='rgba(220,38,38,.5)'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+      ctx.beginPath(); ctx.moveTo(X(s1), pad.t + ch*0.15); ctx.lineTo(X(s1), pad.t + ch*0.85); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(X(L-s1), pad.t + ch*0.15); ctx.lineTo(X(L-s1), pad.t + ch*0.85); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='#16a34a'; ctx.font='bold 10px sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(`parábola (${num(L-2*s1,2)} m)`, X(L/2), pad.t - 12);
+    }
+
+    // Ancoragens
+    function anc(x,y){
+      ctx.fillStyle='#0b3d91';
+      ctx.beginPath(); ctx.arc(x,y,9,0,2*Math.PI); ctx.fill();
+      ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(x,y,3,0,2*Math.PI); ctx.fill();
+    }
+    anc(X(0),Y(pts[0].y));
+    anc(X(L),Y(pts[pts.length-1].y));
+
+    const wP_nominal = R.perdas.Pef*8*(e/100)/(L*L);
+    const L_par = L - 2*s1;
+    const wP_par = L_par > 0.01 ? 8 * R.perdas.Pef * ((e-e0)/100) / (L_par*L_par) : 0;
+
     ctx.strokeStyle='#1560c4';ctx.fillStyle='#1560c4';ctx.lineWidth=1.6;
-    for (let i=0;i<11;i++){const x=pad.l+(i+0.5)/11*cw;const y0=pad.t+ch+22,y1=pad.t+ch+52;ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1);ctx.stroke();ctx.beginPath();ctx.moveTo(x-5,y1+4);ctx.lineTo(x,y1-5);ctx.lineTo(x+5,y1+4);ctx.closePath();ctx.fill();}
+    for (let i=0;i<11;i++){const x=pad.l+(i+0.5)/11*cw;const y0=pad.t+ch+28,y1=pad.t+ch+52;ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1);ctx.stroke();ctx.beginPath();ctx.moveTo(x-5,y1+4);ctx.lineTo(x,y1-5);ctx.lineTo(x+5,y1+4);ctx.closePath();ctx.fill();}
     ctx.font='bold 12px sans-serif';ctx.fillStyle='#1560c4';ctx.textAlign='center';
-    ctx.fillText(`w_p = ${num(wP,2)} kN/m ↑`,pad.l+cw/2,pad.t+ch+68);
-    $('cabNote').innerHTML=`Forma ${forma} · ${R.inp.nCabos} cabo(s) × ${R.inp.nCord}×Ø${num(R.inp.phiCord,1)}`;
-    $('cabCalc').innerHTML=`<div class="note"><b>w_p=8·P·e/L²</b> = ${num(wP,3)} kN/m (↑)<br><b>6.4:</b> ω ≥ g_pp? ${num(wP,2)} ${R.cargBal.ok?'≥':'<'} ${num(R.cargBal.gpp_faixa,2)} → <b>${R.cargBal.status}</b></div>`;
+    ctx.fillText(`w_p (parábola) = ${num(wP_par,2)} kN/m ↑`,pad.l+cw/2,pad.t+ch+68);
+
+    // Cotas
+    const yDim = pad.t+ch+92;
+    ctx.strokeStyle='#334155';ctx.fillStyle='#334155';ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l,yDim);ctx.lineTo(pad.l+cw,yDim);
+    ctx.moveTo(pad.l,yDim-5);ctx.lineTo(pad.l,yDim+5);
+    ctx.moveTo(pad.l+cw,yDim-5);ctx.lineTo(pad.l+cw,yDim+5);
+    ctx.stroke();
+    ctx.font='12px sans-serif';ctx.textAlign='center';
+    ctx.fillText(`L = ${num(L,2)} m`,pad.l+cw/2,yDim+16);
+    const xDim = pad.l-22;
+    ctx.beginPath();
+    ctx.moveTo(xDim,pad.t);ctx.lineTo(xDim,pad.t+ch);
+    ctx.moveTo(xDim-5,pad.t);ctx.lineTo(xDim+5,pad.t);
+    ctx.moveTo(xDim-5,pad.t+ch);ctx.lineTo(xDim+5,pad.t+ch);
+    ctx.stroke();
+    ctx.save();ctx.translate(pad.l-42,pad.t+ch/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.font='12px sans-serif';ctx.fillText(`h = ${num(h,1)} cm`,0,0);ctx.restore();
+
+    // Cota e (excentricidade no meio)
+    const xMid = X(L/2);
+    const yCG = Y(h/2);
+    const yCab = Y(h/2-e);
+    ctx.strokeStyle='#dc2626'; ctx.fillStyle='#dc2626';
+    ctx.beginPath();
+    ctx.moveTo(xMid+18, yCG); ctx.lineTo(xMid+18, yCab);
+    ctx.moveTo(xMid+13, yCG); ctx.lineTo(xMid+23, yCG);
+    ctx.moveTo(xMid+13, yCab); ctx.lineTo(xMid+23, yCab);
+    ctx.stroke();
+    ctx.font='bold 12px sans-serif'; ctx.textAlign='left';
+    ctx.fillText(`e = ${num(e,2)} cm`, xMid+28, (yCG+yCab)/2 + 4);
+
+    // Cota c,inf (cobrimento inferior)
+    const yCinf = Y(cInf);
+    ctx.strokeStyle='#94a3b8'; ctx.fillStyle='#94a3b8';
+    ctx.beginPath();
+    ctx.moveTo(pad.l + 12, pad.t + ch); ctx.lineTo(pad.l + 12, yCinf);
+    ctx.moveTo(pad.l + 7, pad.t + ch); ctx.lineTo(pad.l + 17, pad.t + ch);
+    ctx.moveTo(pad.l + 7, yCinf); ctx.lineTo(pad.l + 17, yCinf);
+    ctx.stroke();
+    ctx.font='10px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillText(`c,inf = ${num(cInf,1)} cm`, pad.l + 20, (pad.t + ch + yCinf)/2);
+
+    // Título
+    ctx.fillStyle='#0b3d91';ctx.font='bold 13px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText('SEÇÃO LONGITUDINAL — Traçado do Cabo',pad.l,20);
+    ctx.font='11px sans-serif';ctx.fillStyle='#64748b';
+    ctx.fillText(`Forma: ${forma} · b = ${num(R.inp.b,0)} cm · ${R.inp.nCabos} cabo(s) × ${R.inp.nCord}×Ø${num(R.inp.phiCord,1)}${forma==='parabolico'?' · apoio='+num(s1*100,0)+' cm':''} · c,inf = ${num(cInf,1)} cm`,pad.l,38);
+
+    // Legenda (apenas 2 itens fixos + opcionais)
+    let lx=pad.l,ly=52;
+    ctx.font='11px sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';
+    const legItems=[
+      {cor:'#f59e0b',txt:'Cabo de protensão'},
+      {cor:'#dc2626',txt:'Armadura positiva inferior (NBR 6118)'}
+    ];
+    if (forma==='parabolico' && s1 > 0.001){
+      legItems.push({cor:'rgba(11,61,145,.3)',txt:'Zona de apoio'});
+      legItems.push({cor:'#16a34a',txt:'Estribos de fretagem'});
+    }
+    for (const l of legItems){
+      ctx.fillStyle=l.cor; ctx.fillRect(lx,ly-4,12,8);
+      ctx.fillStyle='#334155'; ctx.fillText(l.txt, lx+16, ly);
+      lx += 16 + ctx.measureText(l.txt).width + 18;
+      if (lx > W - 200){ lx = pad.l; ly += 15; }
+    }
+
+    $('cabNote').innerHTML=`Forma ${forma} · ${R.inp.nCabos} cabo(s) × ${R.inp.nCord}×Ø${num(R.inp.phiCord,1)}${forma==='parabolico'?' · zona de apoio = '+num(s1*100,0)+' cm':''} · c,inf = ${num(cInf,1)} cm (NBR 6118)`;
+
+    if (forma==='parabolico'){
+      const hb_ref = 12.7;
+      const T_fret = 0.25 * R.perdas.Pef * (1 - hb_ref / h);
+      const As_fret = (T_fret * 1000) / (0.5 * R.acoP.fyd) / 100;
+      const n_estribos_calc = Math.max(3, Math.ceil(As_fret / 0.785));
+
+      $('cabCalc').innerHTML=`<div class="note">
+        <b>Traçado parabólico com zonas de apoio retas (${num(s1*100,0)} cm cada, faixa 20–50 cm):</b><br>
+        • <b>Trecho reto inicial</b>: ${num(s1*100,0)} cm @ e₀ = ${num(e0,2)} cm → <b>zona de APOIO</b><br>
+        • <b>Trecho parabólico central</b>: ${num(L_par,2)} m @ e = ${num(e,2)} cm no centro<br>
+        • <b>Trecho reto final</b>: ${num(s1*100,0)} cm @ e₀ = ${num(e0,2)} cm → <b>zona de APOIO</b><br>
+        <br>
+        <b style="color:#0b3d91">📍 Seção representada:</b><br>
+        • <b style="color:#dc2626">Armadura positiva inferior</b> — única armadura passiva na seção longitudinal<br>
+        • Cobrimento inferior c,inf = ${num(cInf,1)} cm (NBR 6118)<br>
+        • Cabo de protensão (traçado parabólico + zonas retas)<br>
+        • Linha CG como referência para excentricidade<br>
+        <br>
+        <b style="color:#0b3d91">📍 Zona de apoio</b>:<br>
+        • Placa de ancoragem na face<br>
+        • <b style="color:#16a34a">Fretagem</b>: ${n_estribos_calc} φ10 — St. Venant<br>
+        • Regularização ≈ h = ${num(h,0)} cm<br>
+        <br>
+        <b>w<sub>p</sub> no trecho parabólico</b> = ${num(wP_par,3)} kN/m (↑)<br>
+        <b>w<sub>p</sub> nominal (L total)</b> = ${num(wP_nominal,3)} kN/m<br>
+        <br>
+        <b>Verificação 6.4:</b> ω ≥ g<sub>pp</sub>? ${num(wP_par,2)} ${wP_par >= R.cargBal.gpp_faixa?'≥':'<'} ${num(R.cargBal.gpp_faixa,2)} → 
+        <b style="color:${wP_par >= R.cargBal.gpp_faixa ? '#16a34a':'#dc2626'}">${wP_par >= R.cargBal.gpp_faixa ? 'OK':'NÃO ATENDE'}</b>
+      </div>`;
+    } else {
+      $('cabCalc').innerHTML=`<div class="note">
+        <b>w<sub>p</sub>=8·P·e/L²</b> = ${num(wP_nominal,3)} kN/m (↑)<br>
+        <b>Verificação 6.4:</b> ω ≥ g<sub>pp</sub>? ${num(wP_nominal,2)} ${R.cargBal.ok?'≥':'<'} ${num(R.cargBal.gpp_faixa,2)} → <b>${R.cargBal.status}</b>
+      </div>`;
+    }
   } catch(e){ logErr('renderCaboSection: '+e.message); }
 }
 
@@ -970,10 +1161,7 @@ function renderAncoragem(R){
     if (modoAuto){
       $('anc_P0').value   = R.prot.P0.toFixed(2);
       $('anc_Pinf').value = R.perdas.Pef.toFixed(2);
-      // fckj vem automaticamente da aba Materiais (β1 · 0,85 · fck / γc)
-      if (R.fckjInfo){
-        $('anc_fckj').value = R.fckjInfo.fckj.toFixed(2);
-      }
+      if (R.fckjInfo){ $('anc_fckj').value = R.fckjInfo.fckj.toFixed(2); }
     }
     $('anc_P0').readOnly   = modoAuto;
     $('anc_Pinf').readOnly = modoAuto;
@@ -1001,7 +1189,6 @@ function renderAncoragem(R){
       • No ato: f<sub>cp</sub> = 0,8·f<sub>ckj</sub>·√(A'<sub>b</sub>/A<sub>b</sub> − 0,2) ≤ 1,25·f<sub>ckj</sub> → ${num(pa.limAto,2)} MPa<br><br>
       <b>Forças usadas:</b> P<sub>0</sub> = <b>${num(P0,2)} kN</b> ${modoAuto?'(auto)':'(manual)'} · P<sub>∞</sub> = <b>${num(Pinf,2)} kN</b> ${modoAuto?'(auto)':'(manual)'}<br>
       <b>fckj usado</b> = <b>${num(fckj,2)} MPa</b> ${modoAuto?'(auto da aba Materiais)':'(manual)'}<br><br>
-      <b>Substituição (ato):</b> f<sub>cp</sub> = 0,8·${num(fckj,1)}·√(${num(pa.razao,3)} − 0,2) = ${num(pa.limAto1,2)} MPa<br>
       <b>Verificação (ato):</b> ${num(P0,1)} kN ÷ <b>A'b = ${num(pa.Abp_cm2,2)} cm²</b> × 10 = ${num(pa.fcp_ato_MPa,2)} MPa ${pa.okAto?'≤':'<b>NÃO ≤</b>'} ${num(pa.limAto,2)} → <b style="color:${pa.okAto?'#16a34a':'#dc2626'}">${pa.okAto?'OK':'NÃO ATENDE'}</b><br>
       <b>Verificação (serviço):</b> ${num(Pinf,1)} kN ÷ <b>A'b = ${num(pa.Abp_cm2,2)} cm²</b> × 10 = ${num(pa.fcp_serv_MPa,2)} MPa ${pa.okServ?'≤':'<b>NÃO ≤</b>'} ${num(pa.limServ,2)} → <b style="color:${pa.okServ?'#16a34a':'#dc2626'}">${pa.okServ?'OK':'NÃO ATENDE'}</b>`;
     const fr=Engine.fretagem({P_kN:Pinf,hb_cm:hb,h_cm:h,fyd_MPa:acoP.fyd});
@@ -1010,24 +1197,24 @@ function renderAncoragem(R){
       kpi('A<sub>s,fret</sub>',num(fr.As_cm2,2),'cm²','OK','T/(0,5·f_yd)'),
       kpi('R — face',num(fr.R_kN,2),'kN','OK','0,04·P'),
       kpi('A<sub>s,R</sub> (face)',num(fr.As_R_cm2,2),'cm²','OK','R/f_yd'),
-      kpi('Zona regularização',num(fr.zona_cm,1),'cm','OK','≈ h'),
+      kpi('Zona regularização',num(fr.zona_cm,1),'cm','OK','≈ h (trecho reto)'),
       kpi('Sugestão φ12,5',fr.n_phi12_5,'barras','OK',''),
       kpi('Sugestão φ10',fr.n_phi10,'barras','OK',''),
       kpi('Sugestão φ8',fr.n_phi8,'barras','OK','')
     ].join('');
     $('ancFretNote').innerHTML=`
-      <b>St. Venant:</b><br>
+      <b>St. Venant (na zona de apoio):</b><br>
       • T = 0,25·${num(Pinf,1)}·(1 − ${num(hb,2)}/${num(h,1)}) = <b>${num(fr.T_kN,2)} kN</b><br>
       • A<sub>s</sub> = ${num(fr.T_kN,2)}×1000/(0,5·${num(acoP.fyd,1)})/100 = <b>${num(fr.As_cm2,2)} cm²</b><br>
       • R = 0,04·${num(Pinf,1)} = <b>${num(fr.R_kN,2)} kN</b> → A<sub>s,R</sub> = ${num(fr.As_R_cm2,2)} cm²<br>
-      • Distribuir na zona ≈ h = ${num(h,1)} cm`;
+      • Distribuir no trecho reto do cabo (zona de apoio) ≈ h = ${num(h,1)} cm`;
     $('ancResumoBox').innerHTML=[
       kpi('Placa',`${num(ap,0)}×${num(bp,0)}`,'mm','OK',`${num(pa.Ab_cm2,2)} cm²`),
       kpi('Espessura',num(gv('anc_tp'),1),'mm','OK',''),
       kpi("A'/A",num(pa.razao,3),'—','OK',''),
       kpi('Verif. placa',pa.status,'',pa.status,''),
-      kpi('A<sub>s,fret</sub>',num(fr.As_cm2,2),'cm²','OK','solidarização'),
-      kpi('Distribuição',`≈ ${num(h,0)} cm`,'','OK','ao longo de h'),
+      kpi('A<sub>s,fret</sub>',num(fr.As_cm2,2),'cm²','OK','na zona de apoio'),
+      kpi('Distribuição',`≈ ${num(h,0)} cm`,'','OK','trecho reto'),
       kpi('Sugestão',`φ12,5 c/${num(fr.zona_cm/Math.max(fr.n_phi12_5,1)*10,1)}`,'cm','OK',`${fr.n_phi12_5} estribos`)
     ].join('');
     const cv=$('cvFretagem');
@@ -1062,7 +1249,7 @@ function renderAncoragem(R){
       const nEs=Math.min(fr.n_phi12_5,10);
       for (let i=1;i<=nEs;i++){const x=pad.l+(i/(nEs+1))*zonaW;ctx.beginPath();ctx.moveTo(x,pad.t+8);ctx.lineTo(x,pad.t+ch-8);ctx.stroke();}
       ctx.fillStyle='#0b3d91';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-      ctx.fillText('Zona de fretagem ≈ h',pad.l+zonaW/2,pad.t-10);
+      ctx.fillText('Zona de fretagem = trecho reto do cabo ≈ h',pad.l+zonaW/2,pad.t-10);
       ctx.fillStyle='#16a34a';
       ctx.fillText(`A_s = ${num(fr.As_cm2,2)} cm² distribuída`,pad.l+zonaW/2,pad.t+ch+20);
     }
@@ -1309,6 +1496,7 @@ function renderResumo(R){
       {l:'Laje',v:`${num(R.inp.Lx,2)}×${num(R.inp.Ly,2)}`,u:'m',s:'OK',d:`h=${num(R.inp.h,0)}`},
       {l:'fck',v:`C${num(R.inp.fck,0)}`,u:'MPa',s:R.inp.fck>=R.fckMin.fck_min?'OK':'NÃO',d:''},
       {l:'fckj(t)',v:num(R.fckjInfo.fckj,2),u:'MPa',s:'OK',d:`t=${num(R.inp.idadeT,0)}d · β₁=${num(R.fckjInfo.beta1,3)}`},
+      {l:'Apoio',v:num(R.inp.cabReto,0),u:'cm',s:R.inp.cabReto>=20&&R.inp.cabReto<=50?'OK':'ATENÇÃO',d:'20 a 50 cm'},
       {l:'g',v:num(R.car.gTotal,2),u:'kN/m²',s:'OK',d:'permanente'},
       {l:'q',v:num(R.car.qTotal,2),u:'kN/m²',s:'OK',d:'variável'},
       {l:'ELU',v:num(R.pELU,2),u:'kN/m²',s:'OK',d:'combinação última'},
@@ -1330,41 +1518,43 @@ function renderMemorial(R){
     const M=[],P=t=>M.push(t);
     P(`<h3 style="color:#0b3d91;margin-top:20px">1. Identificação</h3><p>${$('pNome').value} — ${$('pResp').value}</p>`);
     P(`<h3 style="color:#0b3d91;margin-top:20px">2. Geometria</h3><pre class="code">Lx=${num(R.inp.Lx,2)} m · Ly=${num(R.inp.Ly,2)} m · h=${num(R.inp.h,0)} cm · b=${num(R.inp.b,0)} cm · d=${num(R.geom.d,2)} cm</pre>`);
-    P(`<h3 style="color:#0b3d91;margin-top:20px">3. Materiais e fckj(t)</h3><pre class="code">fck = ${num(R.inp.fck,0)} MPa · fcd = ${num(R.conc.fcd,2)} MPa · σcd = 0,85·fcd = ${num(R.fckjInfo.sigma_cd,2)} MPa
-Tipo de cimento: s = ${num(R.fckjInfo.s,2)}
-Idade efetiva t = ${num(R.fckjInfo.t,0)} dias
-β₁ = exp[${num(R.fckjInfo.s,2)}·(1 − √(28/${num(R.fckjInfo.t,0)}))] = ${num(R.fckjInfo.beta1,4)}
-fckj (característica) = β₁·fck = ${num(R.fckjInfo.fckj_carac,2)} MPa
-fckj / γc = ${num(R.fckjInfo.fckj_design,2)} MPa
-fckj × 0,85 = β₁·0,85·fck/γc = ${num(R.fckjInfo.fckj,2)} MPa</pre>`);
-    P(`<h3 style="color:#0b3d91;margin-top:20px">4. Cargas</h3><pre class="code">g = ${num(R.car.gTotal,3)} kN/m²
-q = ${num(R.car.qTotal,2)} kN/m²
-pd (ELU) = ${num(R.pELU,3)} kN/m²</pre>`);
-    P(`<h3 style="color:#0b3d91;margin-top:20px">5. Protensão</h3><pre class="code">Ap,total=${num(R.inp.Ap_total,3)} cm² · P0=${num(R.prot.P0,1)} kN · Pef=${num(R.perdas.Pef,1)} kN</pre>`);
-    P(`<h3 style="color:#0b3d91;margin-top:20px">6. Placa de Ancoragem (NBR 9.6.1.2 — divisão por A'b)</h3>
-      <pre class="code">${(()=>{const ap=gv('anc_ap'),bp=gv('anc_bp'),esp=gv('anc_esp'),P0=gv('anc_P0'),Pinf=gv('anc_Pinf'),fckj=gv('anc_fckj');const pa=Engine.placaAncoragem({ap_mm:ap,bp_mm:bp,esp_mm:esp,P0_kN:P0,Pinf_kN:Pinf,fckj_MPa:fckj,fck_MPa:R.inp.fck});const modo=$('anc_auto').value==='1'?'AUTO':'MANUAL';return `Modo: ${modo}
-P0 (ato) = ${num(P0,2)} kN
-P∞ (serviço) = ${num(Pinf,2)} kN
-fckj = ${num(fckj,2)} MPa
+    P(`<h3 style="color:#0b3d91;margin-top:20px">3. Materiais e fckj(t)</h3><pre class="code">fck = ${num(R.inp.fck,0)} MPa · σcd = 0,85·fcd = ${num(R.fckjInfo.sigma_cd,2)} MPa
+s = ${num(R.fckjInfo.s,2)} · t = ${num(R.fckjInfo.t,0)} dias
+β₁ = ${num(R.fckjInfo.beta1,4)} → fckj × 0,85 = ${num(R.fckjInfo.fckj,2)} MPa</pre>`);
+    P(`<h3 style="color:#0b3d91;margin-top:20px">4. Cargas</h3><pre class="code">g = ${num(R.car.gTotal,3)} kN/m² · q = ${num(R.car.qTotal,2)} kN/m² · pd (ELU) = ${num(R.pELU,3)} kN/m²</pre>`);
+    P(`<h3 style="color:#0b3d91;margin-top:20px">5. Protensão</h3><pre class="code">Ap,total=${num(R.inp.Ap_total,3)} cm² · P0=${num(R.prot.P0,1)} kN · Pef=${num(R.perdas.Pef,1)} kN · e=${num(R.inp.e_cm,2)} cm</pre>`);
+    P(`<h3 style="color:#0b3d91;margin-top:20px">5b. Traçado do cabo — zonas de apoio retas</h3><pre class="code">Forma: ${R.inp.cabForma}
+Trecho reto (zona de apoio): ${num(R.inp.cabReto,0)} cm em cada extremidade (faixa 20–50 cm)
+Trecho parabólico central: ${num(R.inp.Lx - 2*R.inp.cabReto/100, 2)} m
 
-Ab  = ${num(pa.Ab_cm2,2)} cm² (${ap}×${bp} mm)
-A'b = ${num(pa.Abp_cm2,2)} cm²
-A'b/Ab = ${num(pa.razao,3)}
+Representação da seção longitudinal:
+  • Armadura positiva inferior (única armadura passiva)
+  • Cobrimento inferior c,inf = ${num(R.inp.cabCinf,1)} cm (NBR 6118)
+  • Cabo de protensão
+  • Linha CG como referência
+
+Nas zonas de apoio (trecho reto):
+  • Placa de ancoragem
+  • Armadura de fretagem (estribos transversais)
+  • Comprimento de regularização ≈ h</pre>`);
+    P(`<h3 style="color:#0b3d91;margin-top:20px">6. Placa de Ancoragem (NBR 9.6.1.2 — divisão por A'b)</h3>
+      <pre class="code">${(()=>{const ap=gv('anc_ap'),bp=gv('anc_bp'),esp=gv('anc_esp'),P0=gv('anc_P0'),Pinf=gv('anc_Pinf'),fckj=gv('anc_fckj');const pa=Engine.placaAncoragem({ap_mm:ap,bp_mm:bp,esp_mm:esp,P0_kN:P0,Pinf_kN:Pinf,fckj_MPa:fckj,fck_MPa:R.inp.fck});const modo=$('anc_auto').value==='1'?'AUTO':'MANUAL';return `Modo: ${modo} · P0=${num(P0,2)} kN · P∞=${num(Pinf,2)} kN · fckj=${num(fckj,2)} MPa
+Ab=${num(pa.Ab_cm2,2)} cm² · A'b=${num(pa.Abp_cm2,2)} cm² · A'b/Ab=${num(pa.razao,3)}
 
 EM SERVIÇO: fcp = 0,6·${R.inp.fck}·√${num(pa.razao,3)} = ${num(pa.limServ,2)} MPa
            Verif: Pinf/A'b = ${num(Pinf,2)}/${num(pa.Abp_cm2,2)}×10 = ${num(pa.fcp_serv_MPa,2)} MPa → ${pa.okServ?'OK':'NÃO ATENDE'}
 
 NO ATO: fcp = 0,8·${num(fckj,2)}·√(${num(pa.razao,3)}−0,2) = ${num(pa.limAto,2)} MPa
         Verif: P0/A'b = ${num(P0,2)}/${num(pa.Abp_cm2,2)}×10 = ${num(pa.fcp_ato_MPa,2)} MPa → ${pa.okAto?'OK':'NÃO ATENDE'}`;})()}</pre>`);
-    P(`<h3 style="color:#0b3d91;margin-top:20px">7. Fretagem (St. Venant)</h3>
-      <pre class="code">${(()=>{const Pinf=gv('anc_Pinf'),hb=gv('anc_hb');const fr=Engine.fretagem({P_kN:Pinf,hb_cm:hb,h_cm:R.inp.h,fyd_MPa:R.acoP.fyd});return `T = 0,25·P·(1−hb/h) = 0,25·${num(Pinf,2)}·(1−${num(hb,2)}/${num(R.inp.h,1)}) = ${num(fr.T_kN,2)} kN
+    P(`<h3 style="color:#0b3d91;margin-top:20px">7. Fretagem (St. Venant — na zona de apoio)</h3>
+      <pre class="code">${(()=>{const Pinf=gv('anc_Pinf'),hb=gv('anc_hb');const fr=Engine.fretagem({P_kN:Pinf,hb_cm:hb,h_cm:R.inp.h,fyd_MPa:R.acoP.fyd});return `T = 0,25·P·(1−hb/h) = ${num(fr.T_kN,2)} kN
 As = T/(0,5·fyd) = ${num(fr.As_cm2,2)} cm²
 R = 0,04·P = ${num(fr.R_kN,2)} kN → As,R = ${num(fr.As_R_cm2,2)} cm²
-Zona de regularização ≈ h = ${R.inp.h} cm
-Sugestão: ${fr.n_phi12_5} φ12,5 ou ${fr.n_phi10} φ10 ou ${fr.n_phi8} φ8`;})()}</pre>`);
+Zona de aplicação = trecho reto do cabo ≈ h = ${R.inp.h} cm
+Sugestão: ${fr.n_phi12_5} φ12,5`;})()}</pre>`);
     P(`<h3 style="color:#0b3d91;margin-top:20px">8. ELU flexão</h3><pre class="code">Md=${num(R.esf.Md,2)} kN.m/m · MRd=${num(R.elu.MRd,2)} · ${R.elu.status}</pre>`);
     P(`<h3 style="color:#0b3d91;margin-top:20px">9. Flechas</h3><pre class="code">δtotal=${num(R.fle.deltaTotal,2)} mm · δadm=${num(R.flechaAdm,1)} mm</pre>`);
-    P(`<h3 style="color:#0b3d91;margin-top:20px">10. Hipóteses</h3><ul style="font-size:12.5px;color:#334155"><li>Viga contínua: Clapeyron.</li><li>Carga balanceada: w_p = 8·P·e/L².</li><li>Item 10: σc ≤ 0,5·fck · σt ≤ 0,5·√fck.</li><li>Placa: NBR 9.6.1.2, divisão por A'b.</li><li>Fretagem: St. Venant.</li><li>fckj(t) conforme item 12.3.3.</li></ul>`);
+    P(`<h3 style="color:#0b3d91;margin-top:20px">10. Hipóteses</h3><ul style="font-size:12.5px;color:#334155"><li>Viga contínua: Clapeyron.</li><li>Carga balanceada: w_p = 8·P·e/L².</li><li>Item 10: σc ≤ 0,5·fck · σt ≤ 0,5·√fck.</li><li>Placa: NBR 9.6.1.2, divisão por A'b.</li><li>Fretagem: St. Venant.</li><li>fckj(t) conforme item 12.3.3.</li><li>Traçado parabólico com trechos retos de apoio (20 a 50 cm).</li><li>Seção longitudinal: apenas armadura positiva inferior representada.</li></ul>`);
     $('memContent').innerHTML=M.join('');
   } catch(e){ logErr('renderMemorial: '+e.message); }
 }
@@ -1499,6 +1689,32 @@ function preDimensionar(){
   } catch(e){ logErr('preDim: '+e.message); }
 }
 
+(function setupCabReto(){
+  const inp = $('cabReto');
+  const sl = $('cabRetoSlider');
+  const lbl = $('cabRetoLabel');
+  if (!inp || !sl || !lbl) return;
+
+  function atualizarDeInput(){
+    const v = clampCabReto(inp.value);
+    inp.value = v; sl.value = v; lbl.textContent = v + ' cm';
+    if (lastR) calcularCompleto();
+  }
+  function atualizarDeSlider(){
+    const v = clampCabReto(sl.value);
+    inp.value = v; sl.value = v; lbl.textContent = v + ' cm';
+    if (lastR) calcularCompleto();
+  }
+
+  inp.addEventListener('change', atualizarDeInput);
+  inp.addEventListener('input', () => { sl.value = inp.value; lbl.textContent = inp.value + ' cm'; });
+  sl.addEventListener('input', atualizarDeSlider);
+  sl.addEventListener('change', atualizarDeSlider);
+
+  const v0 = clampCabReto(inp.value || 30);
+  inp.value = v0; sl.value = v0; lbl.textContent = v0 + ' cm';
+})();
+
 $$('nav.side button').forEach(btn=>{
   btn.addEventListener('click',()=>{
     $$('nav.side button').forEach(b=>b.classList.remove('active'));
@@ -1543,7 +1759,7 @@ function coletarFormulario(){
     mat:{fck:$('mFck').value,gc:$('mGammaC').value,aE:$('mAlphaE').value,cat:$('mCategoria').value,phi:$('mPhiLong').value,cl:$('mAgress').value,et:$('mElemTipo').value,tipCim:$('mTipoCimento').value,idadeT:$('mIdadeT').value},
     car:{gc:$('cGammaC').value,rev:$('cRev').value,cE:$('cContE').value,cG:$('cContG').value,out:$('cOutros').value,pH:$('cParH').value,pE:$('cParE').value,pG:$('cParG').value,pL:$('cParL').value,q:$('cQ').value,gG:$('cGG').value,gQ:$('cGQ').value,p1:$('cPsi1').value,p2:$('cPsi2').value},
     prot:{pT:$('pTipo').value,pA:$('pAder').value,pC:$('pCord').value,pN:$('pN').value,pCb:$('pNCabos').value,pE:$('pE').value,pS:$('pSigma0').value,pMu:$('pMu').value,pK:$('pK').value,pSl:$('pSlip').value,pEc:$('pEcs').value,pPh:$('pPhi').value,pRe:$('pRelax').value,pAp:$('pApoioA').value,pLm:$('pLmedio').value},
-    cab:{f:$('cabForma').value,e:$('cabE').value,e0:$('cabE0').value,ci:$('cabCinf').value},
+    cab:{f:$('cabForma').value,e:$('cabE').value,e0:$('cabE0').value,ci:$('cabCinf').value,r:clampCabReto($('cabReto').value)},
     pu:{a:$('puA').value,b:$('puB').value,F:$('puF').value,M:$('puM').value},
     anc:{auto:$('anc_auto').value,ap:$('anc_ap').value,bp:$('anc_bp').value,esp:$('anc_esp').value,tp:$('anc_tp').value,P0:$('anc_P0').value,Pinf:$('anc_Pinf').value,fckj:$('anc_fckj').value,hb:$('anc_hb').value,phi:$('anc_phi').value},
     faixas,cbSpans:window._cbSpans
@@ -1557,15 +1773,22 @@ function aplicarFormulario(d){
   if (d.mat) Object.entries({mFck:'fck',mGammaC:'gc',mAlphaE:'aE',mCategoria:'cat',mPhiLong:'phi',mAgress:'cl',mElemTipo:'et',mTipoCimento:'tipCim',mIdadeT:'idadeT'}).forEach(([k,v])=>set(k,d.mat[v]));
   if (d.car) Object.entries({cGammaC:'gc',cRev:'rev',cContE:'cE',cContG:'cG',cOutros:'out',cParH:'pH',cParE:'pE',cParG:'pG',cParL:'pL',cQ:'q',cGG:'gG',cGQ:'gQ',cPsi1:'p1',cPsi2:'p2'}).forEach(([k,v])=>set(k,d.car[v]));
   if (d.prot) Object.entries({pTipo:'pT',pAder:'pA',pCord:'pC',pN:'pN',pNCabos:'pCb',pE:'pE',pSigma0:'pS',pMu:'pMu',pK:'pK',pSlip:'pSl',pEcs:'pEc',pPhi:'pPh',pRelax:'pRe',pApoioA:'pAp',pLmedio:'pLm'}).forEach(([k,v])=>set(k,d.prot[v]));
-  if (d.cab) Object.entries({cabForma:'f',cabE:'e',cabE0:'e0',cabCinf:'ci'}).forEach(([k,v])=>set(k,d.cab[v]));
+  if (d.cab) {
+    Object.entries({cabForma:'f',cabE:'e',cabE0:'e0',cabCinf:'ci',cabReto:'r'}).forEach(([k,v])=>set(k,d.cab[v]));
+    const inp=$('cabReto'), sl=$('cabRetoSlider'), lbl=$('cabRetoLabel');
+    if (inp && sl && lbl){
+      const v = clampCabReto(inp.value);
+      inp.value = v; sl.value = v; lbl.textContent = v + ' cm';
+    }
+  }
   if (d.pu) Object.entries({puA:'a',puB:'b',puF:'F',puM:'M'}).forEach(([k,v])=>set(k,d.pu[v]));
   if (d.anc) Object.entries({anc_auto:'auto',anc_ap:'ap',anc_bp:'bp',anc_esp:'esp',anc_tp:'tp',anc_P0:'P0',anc_Pinf:'Pinf',anc_fckj:'fckj',anc_hb:'hb',anc_phi:'phi'}).forEach(([k,v])=>set(k,d.anc[v]));
   if (d.faixas && Array.isArray(d.faixas)){faixas=d.faixas;renderFaixasInputs();}
   if (d.cbSpans && Array.isArray(d.cbSpans)){window._cbSpans=d.cbSpans;renderCbInputs();}
 }
-$('btnSalvar').addEventListener('click',()=>{localStorage.setItem('apavan_v12',JSON.stringify(coletarFormulario()));toast('Salvo.');});
+$('btnSalvar').addEventListener('click',()=>{localStorage.setItem('apavan_v16',JSON.stringify(coletarFormulario()));toast('Salvo.');});
 $('btnAbrir').addEventListener('click',()=>{
-  const raw=localStorage.getItem('apavan_v12')||localStorage.getItem('apavan_v11');
+  const raw=localStorage.getItem('apavan_v16')||localStorage.getItem('apavan_v15');
   if (!raw){toast('Nada salvo.');return;}
   try {aplicarFormulario(JSON.parse(raw));calcularCompleto();toast('Carregado.');}catch(e){toast('Erro.');}
 });
@@ -1581,7 +1804,7 @@ $('fileImport').addEventListener('change',e=>{
   r.readAsText(f);
 });
 function syncExc(src){const other=src==='pE'?'cabE':'pE';if ($(other).value!==$(src).value) $(other).value=$(src).value;}
-const autoCampos=['gLx','gLy','gH','gB','gC','gSis','mFck','mCategoria','mPhiLong','mAgress','mElemTipo','mTipoCimento','mIdadeT','cQ','cRev','cContE','cContG','cOutros','cParH','cParE','cParG','cParL','cGG','cGQ','cPsi1','cPsi2','cGammaC','pTipo','pAder','pCord','pN','pNCabos','pE','pSigma0','pMu','pK','pSlip','pEcs','pPhi','pRelax','pApoioA','pLmedio','cabForma','cabE','cabE0','cabCinf','puA','puB','puF','puM','anc_ap','anc_bp','anc_esp','anc_tp','anc_fckj','anc_hb','anc_phi','anc_auto'];
+const autoCampos=['gLx','gLy','gH','gB','gC','gSis','mFck','mCategoria','mPhiLong','mAgress','mElemTipo','mTipoCimento','mIdadeT','cQ','cRev','cContE','cContG','cOutros','cParH','cParE','cParG','cParL','cGG','cGQ','cPsi1','cPsi2','cGammaC','pTipo','pAder','pCord','pN','pNCabos','pE','pSigma0','pMu','pK','pSlip','pEcs','pPhi','pRelax','pApoioA','pLmedio','cabForma','cabE','cabE0','cabCinf','cabReto','puA','puB','puF','puM','anc_ap','anc_bp','anc_esp','anc_tp','anc_fckj','anc_hb','anc_phi','anc_auto'];
 autoCampos.forEach(id=>{
   const el=$(id);if (!el) return;
   el.addEventListener('change',()=>{
@@ -1603,7 +1826,7 @@ function svgToPng(svg,size){return new Promise(resolve=>{try{const blob=new Blob
   const mBlob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
   $('manifest-link').href=URL.createObjectURL(mBlob);
   if ('serviceWorker' in navigator){
-    const swCode=`self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.open('apavan-v12').then(c=>c.match(e.request).then(r=>r||fetch(e.request).then(resp=>{if(resp.ok&&(new URL(e.request.url).origin===location.origin))c.put(e.request,resp.clone());return resp;}).catch(()=>c.match(e.request)))))});`;
+    const swCode=`self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.open('apavan-v16').then(c=>c.match(e.request).then(r=>r||fetch(e.request).then(resp=>{if(resp.ok&&(new URL(e.request.url).origin===location.origin))c.put(e.request,resp.clone());return resp;}).catch(()=>c.match(e.request)))))});`;
     try {const swBlob=new Blob([swCode],{type:'application/javascript'});navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});}catch(e){}
   }
   let dp;
@@ -1614,7 +1837,7 @@ function init(){
   if ($('pE') && $('cabE')) syncExc('pE');
   renderCbInputs();
   renderFaixasInputs();
-  const raw=localStorage.getItem('apavan_v12')||localStorage.getItem('apavan_v11');
+  const raw=localStorage.getItem('apavan_v16')||localStorage.getItem('apavan_v15');
   if (raw){try {aplicarFormulario(JSON.parse(raw));}catch(e){}}
   calcularCompleto();
   setTimeout(()=>{if (lastR){renderChart(currentChart,lastR);renderCaboSection(lastR);renderDetalhamento(lastR);renderAncoragem(lastR);renderFckj(lastR);}},300);
